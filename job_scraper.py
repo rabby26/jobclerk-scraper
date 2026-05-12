@@ -60,6 +60,9 @@ def send_email(new_jobs):
         print("Email credentials not set. Skipping email notification.")
         return
 
+    # Split the comma-separated string into a list of emails
+    receivers = [email.strip() for email in RECEIVER_EMAIL.split(',') if email.strip()]
+
     subject = f"JobClerk Alert: {len(new_jobs)} New Medical Doctor (Junior) Jobs!"
     
     html_content = "<h2>New Jobs Found on JobClerk</h2><ul>"
@@ -76,7 +79,7 @@ def send_email(new_jobs):
     msg = MIMEMultipart("alternative")
     msg['Subject'] = subject
     msg['From'] = SENDER_EMAIL
-    msg['To'] = RECEIVER_EMAIL
+    msg['To'] = ", ".join(receivers) # Display all receivers in the 'To' field
 
     part = MIMEText(html_content, "html")
     msg.attach(part)
@@ -85,7 +88,7 @@ def send_email(new_jobs):
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
         server.starttls()
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
+        server.sendmail(SENDER_EMAIL, receivers, msg.as_string())
         server.quit()
         print("Email sent successfully!")
     except Exception as e:
