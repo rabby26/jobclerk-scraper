@@ -2,10 +2,8 @@ name: JobClerk Scraper
 
 on:
   schedule:
-    # 13:00 to 16:30 UTC = 19:00 to 22:30 BDT
-    - cron: '0,30 13-16 * * *'
-    # 17:00 UTC = 23:00 BDT
-    - cron: '0 17 * * *'
+    # Runs every 15 minutes, 24/7
+    - cron: '*/15 * * * *'
   workflow_dispatch: # Allows you to manually trigger the workflow
 
 jobs:
