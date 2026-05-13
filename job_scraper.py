@@ -7,7 +7,7 @@ from email.mime.multipart import MIMEMultipart
 import os
 import sys
 
-URL = "https://jobclerk.com/jobs?q=Medical+doctor&grade=junior"
+URL = "https://www.jobclerk.com/jobs?grade=Junior&profession=Medical+doctor"
 SEEN_JOBS_FILE = "seen_jobs.json"
 
 SMTP_SERVER = "smtp.gmail.com"
