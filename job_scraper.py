@@ -105,10 +105,14 @@ def main():
     new_jobs = []
     
     for job in jobs:
-        job_id = job.get('id')
-        if job_id and job_id not in seen_jobs:
+        title = job.get('title', '').strip()
+        employer = job.get('employerName', '').strip()
+        # Create a stable identifier based on title and employer
+        stable_id = f"{title}::{employer}"
+        
+        if stable_id and stable_id not in seen_jobs:
             new_jobs.append(job)
-            seen_jobs.add(job_id)
+            seen_jobs.add(stable_id)
             
     if new_jobs:
         print(f"Found {len(new_jobs)} new jobs!")
