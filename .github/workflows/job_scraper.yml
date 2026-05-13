@@ -37,4 +37,8 @@ jobs:
           git push
 
       - name: Keepalive Workflow
-        uses: gautamkrishnar/keepalive-workflow@v1
+        run: |
+          date > keepalive.txt
+          git add keepalive.txt
+          git commit -m "Keepalive commit" || echo "No keepalive needed"
+          git push
