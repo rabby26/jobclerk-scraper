@@ -6,8 +6,10 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 import sys
+import time
 
 URL = "https://www.jobclerk.com/jobs?grade=Junior&profession=Medical+doctor"
+SEEN_JOBS_FILE = "seen_jobs.json"
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
@@ -40,7 +42,20 @@ def fetch_jobs():
         print(f"Error fetching jobs: {e}")
         return []
 
+def load_seen_jobs():
+    if os.path.exists(SEEN_JOBS_FILE):
+        with open(SEEN_JOBS_FILE, 'r') as f:
+            try:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    return data
+            except Exception:
+                pass
+    return {}
 
+def save_seen_jobs(seen_jobs):
+    with open(SEEN_JOBS_FILE, 'w') as f:
+        json.dump(seen_jobs, f)
 
 def send_email(new_jobs):
     if not SENDER_EMAIL or not SENDER_PASSWORD or not RECEIVER_EMAIL:
@@ -88,8 +103,31 @@ def main():
         print("No jobs found or failed to parse. Exiting.")
         sys.exit(0)
     
-    print(f"Found {len(jobs)} jobs!")
-    send_email(jobs)
+    seen_jobs = load_seen_jobs()
+    current_time = time.time()
+    jobs_to_notify = []
+    
+    for job in jobs:
+        title = job.get('title', '').strip()
+        employer = job.get('employerName', '').strip()
+        stable_id = f"{title}::{employer}"
+        
+        # If the job was notified within the last hour (3600 seconds), skip it
+        if stable_id in seen_jobs and (current_time - seen_jobs[stable_id]) < 3600:
+            continue
+            
+        jobs_to_notify.append(job)
+        seen_jobs[stable_id] = current_time
+        
+    # Clean up seen_jobs older than 1 hour to prevent the file from growing indefinitely
+    seen_jobs = {k: v for k, v in seen_jobs.items() if (current_time - v) < 3600}
+        
+    if jobs_to_notify:
+        print(f"Found {len(jobs_to_notify)} jobs to notify!")
+        send_email(jobs_to_notify)
+        save_seen_jobs(seen_jobs)
+    else:
+        print("No new or recently unseen jobs found. Skipping email.")
 
 if __name__ == "__main__":
     main()
