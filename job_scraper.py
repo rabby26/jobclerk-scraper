@@ -112,15 +112,15 @@ def main():
         employer = job.get('employerName', '').strip()
         stable_id = f"{title}::{employer}"
         
-        # If the job was notified within the last hour (3600 seconds), skip it
-        if stable_id in seen_jobs and (current_time - seen_jobs[stable_id]) < 3600:
+        # If the job was notified within the last day (86400 seconds), skip it
+        if stable_id in seen_jobs and (current_time - seen_jobs[stable_id]) < 86400:
             continue
             
         jobs_to_notify.append(job)
         seen_jobs[stable_id] = current_time
         
-    # Clean up seen_jobs older than 1 hour to prevent the file from growing indefinitely
-    seen_jobs = {k: v for k, v in seen_jobs.items() if (current_time - v) < 3600}
+    # Clean up seen_jobs older than 1 day to prevent the file from growing indefinitely
+    seen_jobs = {k: v for k, v in seen_jobs.items() if (current_time - v) < 86400}
         
     if jobs_to_notify:
         print(f"Found {len(jobs_to_notify)} jobs to notify!")
