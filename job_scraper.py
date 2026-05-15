@@ -8,8 +8,6 @@ import os
 import sys
 
 URL = "https://www.jobclerk.com/jobs?grade=Junior&profession=Medical+doctor"
-SEEN_JOBS_FILE = "seen_jobs.json"
-
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
@@ -42,18 +40,7 @@ def fetch_jobs():
         print(f"Error fetching jobs: {e}")
         return []
 
-def load_seen_jobs():
-    if os.path.exists(SEEN_JOBS_FILE):
-        with open(SEEN_JOBS_FILE, 'r') as f:
-            try:
-                return set(json.load(f))
-            except Exception:
-                return set()
-    return set()
 
-def save_seen_jobs(seen_jobs):
-    with open(SEEN_JOBS_FILE, 'w') as f:
-        json.dump(list(seen_jobs), f)
 
 def send_email(new_jobs):
     if not SENDER_EMAIL or not SENDER_PASSWORD or not RECEIVER_EMAIL:
@@ -63,7 +50,7 @@ def send_email(new_jobs):
     # Split the comma-separated string into a list of emails
     receivers = [email.strip() for email in RECEIVER_EMAIL.split(',') if email.strip()]
 
-    subject = f"JobClerk Alert: {len(new_jobs)} New Medical Doctor (Junior) Jobs!"
+    subject = f"JobClerk Alert: {len(new_jobs)} Medical Doctor (Junior) Jobs Available!"
     
     html_content = "<h2>New Jobs Found on JobClerk</h2><ul>"
     for job in new_jobs:
@@ -101,26 +88,8 @@ def main():
         print("No jobs found or failed to parse. Exiting.")
         sys.exit(0)
     
-    seen_jobs = load_seen_jobs()
-    new_jobs = []
-    
-    for job in jobs:
-        title = job.get('title', '').strip()
-        employer = job.get('employerName', '').strip()
-        # Create a stable identifier based on title and employer
-        stable_id = f"{title}::{employer}"
-        
-        if stable_id and stable_id not in seen_jobs:
-            new_jobs.append(job)
-            seen_jobs.add(stable_id)
-            
-    if new_jobs:
-        print(f"Found {len(new_jobs)} new jobs!")
-        send_email(new_jobs)
-        save_seen_jobs(seen_jobs)
-        print("State updated.")
-    else:
-        print("No new jobs found.")
+    print(f"Found {len(jobs)} jobs!")
+    send_email(jobs)
 
 if __name__ == "__main__":
     main()
