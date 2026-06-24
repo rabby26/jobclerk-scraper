@@ -110,6 +110,12 @@ def main():
     for job in jobs:
         title = job.get('title', '').strip()
         employer = job.get('employerName', '').strip()
+        
+        # Filter jobs by specific keywords (case-insensitive, normalized spaces)
+        title_normalized = " ".join(title.lower().split())
+        if "trust grade doctor" not in title_normalized and "junior clinical fellow" not in title_normalized:
+            continue
+            
         stable_id = f"{title}::{employer}"
         
         # If the job was notified within the last day (86400 seconds), skip it
