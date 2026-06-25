@@ -107,13 +107,32 @@ def main():
     current_time = time.time()
     jobs_to_notify = []
     
+    # Keywords to match in job titles (case-insensitive)
+    target_keywords = [
+        "trust grade doctor",
+        "junior clinical fellow",
+        "trust doctor st1/2",
+        "clinical fellow st1/2",
+        "trust doctor st1-2",
+        "clinical fellow st1-2",
+        "trust grade clinical fellow",
+        "emergency medicine",
+        "clinical fellow",
+        "trust fellow",
+        "trust clinical fellow",
+        "(st1-2)",
+        "(st1/2)",
+        "junior fellow",
+        "trust doctor"
+    ]
+    
     for job in jobs:
         title = job.get('title', '').strip()
         employer = job.get('employerName', '').strip()
         
         # Filter jobs by specific keywords (case-insensitive, normalized spaces)
         title_normalized = " ".join(title.lower().split())
-        if "trust grade doctor" not in title_normalized and "junior clinical fellow" not in title_normalized:
+        if not any(kw in title_normalized for kw in target_keywords):
             continue
             
         stable_id = f"{title}::{employer}"
