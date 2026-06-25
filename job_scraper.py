@@ -132,6 +132,11 @@ def main():
         
         # Filter jobs by specific keywords (case-insensitive, normalized spaces)
         title_normalized = " ".join(title.lower().split())
+        
+        # Exclude ST3 and CT3 grade levels
+        if "st3" in title_normalized or "ct3" in title_normalized:
+            continue
+            
         if not any(kw in title_normalized for kw in target_keywords):
             continue
             
